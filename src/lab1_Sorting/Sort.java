@@ -8,7 +8,8 @@ public class Sort {
      * Статичекий метод сортировки пузырьком
      *
      * @param arrInt массив типа Integer, который необходимо отсортировать
-     * @return возвращает отсортированный массив типа Integer
+     * @return возвращает отсортированный массив типа Integer, и null, если элемент содержит
+     * null значение, или ссылка массива null
      */
     public static Integer[] doSort(Integer[] arrInt) {
         if (arrInt == null) {
