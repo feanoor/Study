@@ -1,17 +1,25 @@
 package lab2_Box;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
+/**
+ * Класс осуществляет хранение, добавление и удаление коллекции элементов Object
+ */
 public class ObjectBox {
-    protected List objList = new ArrayList<>();
+    private Collection objList = new ArrayList<>();
 
-
+    /**
+     * Добавляет элемент в коллекцию
+     * @param obj любой элемент типа Object
+     */
     void addObject(Object obj) {
         objList.add(obj);
     }
 
+    /**
+     * Удаляет элемент из коллекции
+     * @param obj любой элемент типа Object
+     */
     void deleteObject(Object obj) {
         objList.remove(obj);
     }
@@ -26,6 +34,10 @@ public class ObjectBox {
         return str.substring(0, str.length() - 1);
     }
 
+    /**
+     * Выводит список элементов коллекции в строку
+     * @return возвращает String
+     */
     public String dump() {
         return toString();
     }

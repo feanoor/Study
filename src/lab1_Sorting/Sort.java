@@ -14,8 +14,8 @@ public class Sort {
     public static Integer[] doSort(Integer[] arrInt) {
         if (arrInt == null) {
             try {
-                throw new MyArrayExceprion("Массив не инициализирован");
-            } catch (MyArrayExceprion ex) {
+                throw new MySimpleException("Массив не инициализирован");
+            } catch (MySimpleException ex) {
                 System.out.println(ex.toString());
                 return null;
             }
@@ -26,8 +26,8 @@ public class Sort {
             for (int j = 0; j < len - i - 1; j++) {
                 if (arrInt[j] == null | arrInt[j + 1] == null) {
                     try {
-                        throw new MyArrayExceprion("Элемент содержит null значение");
-                    } catch (MyArrayExceprion ex) {
+                        throw new MySimpleException("Элемент содержит null значение");
+                    } catch (MySimpleException ex) {
                         System.out.println(ex.toString());
                         return null;
                     }
