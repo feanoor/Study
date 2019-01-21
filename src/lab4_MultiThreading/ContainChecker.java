@@ -11,6 +11,10 @@ public class ContainChecker{
     static ArrayList<File> filesArr= new ArrayList<File>();
     static ListIterator li;
     static Pattern p1 = Pattern.compile("([a-zA-Z]{1,14})");
+    static Pattern pAll = Pattern.compile("([A-ZА-Я][^.?!]*[.!?])");
+    static Pattern pLeft = Pattern.compile("([A-ZА-Я][^.?!]*$)");
+    static Pattern pRight = Pattern.compile("([^A-ZА-Я.?!]*[.!?])");
+    //static Pattern mustBeDestroyed = Pattern.compile("([^а-яa-z]*)");
     static String[] dictionary = null;
     static HashSet<String> dictHash;
     static LinkedList<String> containedStr = new LinkedList<>();
@@ -34,6 +38,7 @@ public class ContainChecker{
     }
 
     public void checkContain(){
+
         while (li.hasNext()){
             rLock.lock();
             File file = filesArr.get(li.nextIndex());
@@ -58,33 +63,74 @@ public class ContainChecker{
     }
 
 
-    void checkEquals(File f ){
-//        DataInputStream dis = null;
+    void checkEquals(File f ) {
+    //-------------------------
+        BufferedReader br = null;
         try {
-//            dis = new DataInputStream(new FileInputStream(f));
-//            String readedStr = dis.readUTF();
-//            Matcher m1;
-//            m1 = p1.matcher(readedStr);
-            BufferedReader br = new BufferedReader(new FileReader(f));
-            String readedStr;
-            while((readedStr = br.readLine())!= null) {
-                Matcher m1;
-                m1 = p1.matcher(readedStr);
-                while (m1.find()) {
-                    //System.out.println(m1.group());
-                    String str = m1.group();
-                    if (dictHash.contains(str.toLowerCase())) {
-                        rLock2.lock();
-                        containedStr.add(str);
-                        rLock2.unlock();
-                    }
+            br = new BufferedReader(new FileReader("C:\\docs\\Harry Potter and the Philosophers Stone.txt"));
+
+        String readedStr;
+        String tempStr = "";
+        //HashMap<Integer,String> tempStr = new HashMap<>();
+        //int i = 0;
+        //TODO: Для одного большого файла нужно сделать общую переменную AtomicInteger например и записывать номер считываемой строки. Чтение и запись залочить. Она будет в качестве ключа в хэш-мапе незаконченной строки.
+
+        while((readedStr = br.readLine())!= null) {
+            //i++;
+            if (tempStr == "") {
+                Matcher mLeft;
+                mLeft = pLeft.matcher(readedStr);
+                if (mLeft.find()) {
+                    String str = mLeft.group();
+                    //tempStr.put(i,str);
+                    tempStr += str;
                 }
             }
-            printContainedStr();
+
+            if (tempStr != "") {
+                Matcher mRight;
+                mRight = pRight.matcher(readedStr);
+                if (mRight.find()) {
+                    String str = mRight.group();
+                    //tempStr.put(i,str);
+                    tempStr += str;
+                    //System.out.println(tempStr);
+                    if(containsInDict(str,dictHash)){
+                        System.out.println(str);
+                    }
+                    tempStr = "";
+                }
+            }
+
+            Matcher mAll;
+            mAll = pAll.matcher(readedStr);
+            while (mAll.find()) {
+                String str = mAll.group();
+                //System.out.println(str);
+                if(containsInDict(str,dictHash)){
+                    System.out.println(str);
+                }
+            }
+        }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //------------------------
+    }
+
+    boolean containsInDict(String st, HashSet<String> dic  ){
+        st = st.toLowerCase();
+        HashSet<String> setWords = new HashSet<>();
+        //System.out.println(st);
+        String mustBeDestroyed = "([^а-яa-z]+)";
+        st = st.replaceAll(mustBeDestroyed, " ");
+        Collections.addAll(setWords,st.split("\\s+")) ;
+        if(!Collections.disjoint(setWords, dic)){
+            //System.out.println(st);
+            return true;
+        }
+        return false;
     }
 }
