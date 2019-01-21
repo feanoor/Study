@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ContainChecker{
+public class ContainChecker implements Occurenciesable{
     public static ArrayList<String> contList = new ArrayList<String>();
     static ArrayList<File> filesArr= new ArrayList<File>();
     static ListIterator li;
@@ -20,7 +20,9 @@ public class ContainChecker{
     static LinkedList<String> containedStr = new LinkedList<>();
     static ReentrantLock rLock = new ReentrantLock();
     static ReentrantLock rLock2 = new ReentrantLock();
+    static int indexFilesMas = 0;
     static {
+
         File file = new File("C:\\docs\\trash2\\");
         for(File i :file.listFiles()){
             if(i.isFile()){
@@ -37,19 +39,29 @@ public class ContainChecker{
 
     }
 
-    public void checkContain(){
+    public void checkContain(String[] files, String output) {
 
-        while (li.hasNext()){
+//        while (li.hasNext()){
+////            rLock.lock();
+////            File file = filesArr.get(li.nextIndex());
+////            System.out.println(Thread.currentThread().getName() + " работает с файлом " +file.getName());
+////            li.next();
+////            rLock.unlock();
+////
+////            checkEquals(file, "C:\\docs\\output.txt");
+////
+////
+////        }
+        while (indexFilesMas < files.length){
             rLock.lock();
-            File file = filesArr.get(li.nextIndex());
-            System.out.println(Thread.currentThread().getName() + " работает с файлом " +file.getName());
-            li.next();
-            rLock.unlock();
+        File file = new File(files[indexFilesMas]);
+        System.out.println(Thread.currentThread().getName() + " работает с файлом " + file.getName());
+        indexFilesMas++;
+        rLock.unlock();
 
-            checkEquals(file);
-
-
-        }
+        //checkEquals(file, "C:\\docs\\output.txt");
+            checkEquals(file, output);
+    }
 
     }
 
@@ -62,19 +74,30 @@ public class ContainChecker{
         rLock2.unlock();
     }
 
+    void writeToFile(String str, String file)
+    {
+        try {
+            rLock2.lock();
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+            bw.write(str+"\n");
+            bw.close();rLock2.unlock();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    void checkEquals(File f ) {
+
+    void checkEquals(File fi, String fo  ) {
     //-------------------------
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader("C:\\docs\\Harry Potter and the Philosophers Stone.txt"));
+            //br = new BufferedReader(new FileReader("C:\\docs\\Harry Potter and the Philosophers Stone.txt"));
+            br = new BufferedReader(new FileReader(fi));
 
         String readedStr;
         String tempStr = "";
         //HashMap<Integer,String> tempStr = new HashMap<>();
         //int i = 0;
-        //TODO: Для одного большого файла нужно сделать общую переменную AtomicInteger например и записывать номер считываемой строки. Чтение и запись залочить. Она будет в качестве ключа в хэш-мапе незаконченной строки.
-
         while((readedStr = br.readLine())!= null) {
             //i++;
             if (tempStr == "") {
@@ -84,6 +107,8 @@ public class ContainChecker{
                     String str = mLeft.group();
                     //tempStr.put(i,str);
                     tempStr += str;
+
+
                 }
             }
 
@@ -97,6 +122,7 @@ public class ContainChecker{
                     //System.out.println(tempStr);
                     if(containsInDict(str,dictHash)){
                         System.out.println(str);
+                        writeToFile(str,fo);
                     }
                     tempStr = "";
                 }
@@ -109,6 +135,7 @@ public class ContainChecker{
                 //System.out.println(str);
                 if(containsInDict(str,dictHash)){
                     System.out.println(str);
+                    writeToFile(str,fo);
                 }
             }
         }
@@ -132,5 +159,16 @@ public class ContainChecker{
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void getOccurencies(String[] sources, String[] words, String res) throws FileNotFoundException {
+        PrintWriter pw = new PrintWriter(res);
+        pw.write("");
+        pw.close();
+        getDictHashSet(words);
+        checkContain(sources, res);
+
+
     }
 }

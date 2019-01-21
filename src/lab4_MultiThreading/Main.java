@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        String[] dictMas;
+        String[] dictMas = null;
         try {
             //считываем словарь в массив словарь для дальнейшего поиска в нем
             BufferedReader br = new BufferedReader(new FileReader("C:\\docs\\dictForMThreading.txt"));
@@ -21,15 +21,38 @@ public class Main {
             }
             dictMas = st.toArray(new String[0]);
             //------------------------------------------------------------------
-            ContainChecker ch = new ContainChecker();
+            //ContainChecker ch = new ContainChecker();
 
-            ch.getDictHashSet(dictMas);
-            System.out.println(ContainChecker.dictHash);
+            //ch.getDictHashSet(dictMas);
+            //System.out.println(ContainChecker.dictHash);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        //тут генерим список путей к файлам из указанной директории
+        String[] sourcePaths;
+        ArrayList<String> arrPaths = new ArrayList();
+        //here is source
+        //File file = new File("C:\\docs\\trash2\\");
+        File file = new File("C:\\docs\\trash\\");
+        for(File i : file.listFiles()){
+            if(i.isFile()){
 
+                arrPaths.add(i.getAbsolutePath());
+            }
+        }
+        sourcePaths = arrPaths.toArray(new String[0]);
+//        for(String i : sourcePaths){
+//            System.out.println(i);
+//        }
+        //Запуск в один поток
+//        ContainChecker ch = new ContainChecker();
+//        long start = System.currentTimeMillis();
+//        ch.getOccurencies(sourcePaths, dictMas, "C:\\docs\\output.txt");
+//        System.out.println(System.currentTimeMillis()-start + " ms");
+//        45sec
+        //------------------------------
+        ///////////////
 //        try {
 //            DataInputStream dis = null;
 //            dis = new DataInputStream(new FileInputStream("C:\\docs\\trash2\\text-1.txt"));
@@ -47,13 +70,19 @@ public class Main {
 //        }
 
         //тут запукаются треды
-        Thread[] threadMas = new Thread[1];
-        for (int i = 0; i < 1 ; i++) {
-            threadMas[i] = new WorkingThread();
+
+        long start = System.currentTimeMillis();
+
+
+        Thread[] threadMas = new Thread[2];
+        for (int i = 0; i < threadMas.length ; i++) {
+            threadMas[i] = new WorkingThread(sourcePaths, dictMas, "C:\\docs\\output.txt");
             threadMas[i].start();
 
         }
-
+        //2 потока 30sec
+        //3 потока 31sec
+        //5 потоков 32sec
         for(Thread i : threadMas){
             try {
                 i.join();
@@ -61,6 +90,8 @@ public class Main {
                 e.printStackTrace();
             }
         }
+
+        System.out.println(System.currentTimeMillis()-start + " ms");
         //-------------------------------------
 /*        Pattern pAll = Pattern.compile("([A-ZА-Я][^.?!]*[.!?])");
         Pattern pLeft = Pattern.compile("([A-ZА-Я][^.?!]*$)");
