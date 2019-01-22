@@ -1,24 +1,20 @@
 package lab4_MultiThreading;
 
-import java.io.FileNotFoundException;
 
 public class WorkingThread extends Thread {
     String[] source;
-    String[] dict;
     String output;
+    ContainChecker ch;
+
     @Override
     public void run() {
         System.out.println("Поток " + this.getName() + " запущен!");
-        ContainChecker cr = new ContainChecker();
-        try {
-            cr.getOccurencies(source,dict,output);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        //ContainChecker cr = new ContainChecker();
+        ch.checkContain(source, output);
     }
-    WorkingThread(String[] source, String[] dict, String output)
-    {
-        this.dict = dict;
+
+    WorkingThread(ContainChecker ch, String[] source, String output) {
+        this.ch = ch;
         this.output = output;
         this.source = source;
     }

@@ -6,34 +6,19 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ContainChecker implements Occurenciesable{
-    public static ArrayList<String> contList = new ArrayList<String>();
-    static ArrayList<File> filesArr= new ArrayList<File>();
-    static ListIterator li;
+public class ContainChecker implements Occurenciesable {
     static Pattern p1 = Pattern.compile("([a-zA-Z]{1,14})");
-    static Pattern pAll = Pattern.compile("([A-ZА-Я][^.?!]*[.!?])");
-    static Pattern pLeft = Pattern.compile("([A-ZА-Я][^.?!]*$)");
-    static Pattern pRight = Pattern.compile("([^A-ZА-Я.?!]*[.!?])");
-    //static Pattern mustBeDestroyed = Pattern.compile("([^а-яa-z]*)");
-    static String[] dictionary = null;
+    static Pattern pAll = Pattern.compile("([A-ZА-Я][^.?!…]*[.!?…])");
+    static Pattern pLeft = Pattern.compile("([A-ZА-Я][^.?!…]*$)");
+    static Pattern pRight = Pattern.compile("([^A-ZА-Я.?!…]*[.!?…])");
+    //static String[] dictionary = null;
     static HashSet<String> dictHash;
     static LinkedList<String> containedStr = new LinkedList<>();
     static ReentrantLock rLock = new ReentrantLock();
     static ReentrantLock rLock2 = new ReentrantLock();
     static int indexFilesMas = 0;
-    static {
 
-        File file = new File("C:\\docs\\trash2\\");
-        for(File i :file.listFiles()){
-            if(i.isFile()){
-                filesArr.add(i);
-                System.out.println(i.getName());
-            }
-        }
-        li = filesArr.listIterator();
-    }
-
-    void getDictHashSet(String[] str){
+    void getDictHashSet(String[] str) {
         dictHash = new HashSet<>();
         dictHash.addAll(Arrays.asList(str));
 
@@ -41,104 +26,92 @@ public class ContainChecker implements Occurenciesable{
 
     public void checkContain(String[] files, String output) {
 
-//        while (li.hasNext()){
-////            rLock.lock();
-////            File file = filesArr.get(li.nextIndex());
-////            System.out.println(Thread.currentThread().getName() + " работает с файлом " +file.getName());
-////            li.next();
-////            rLock.unlock();
-////
-////            checkEquals(file, "C:\\docs\\output.txt");
-////
-////
-////        }
-        while (indexFilesMas < files.length){
+        while (indexFilesMas < files.length) {
             rLock.lock();
-        File file = new File(files[indexFilesMas]);
-        System.out.println(Thread.currentThread().getName() + " работает с файлом " + file.getName());
-        indexFilesMas++;
-        rLock.unlock();
+            File file = new File(files[indexFilesMas]);
+            System.out.println(Thread.currentThread().getName() + " работает с файлом " + file.getName());
+            indexFilesMas++;
+            rLock.unlock();
 
-        //checkEquals(file, "C:\\docs\\output.txt");
+            //checkEquals(file, "C:\\docs\\output.txt");
             checkEquals(file, output);
-    }
+        }
 
     }
 
-    void printContainedStr(){
+    void printContainedStr() {
         System.out.println("\n\ncontainedStr:");
         rLock2.lock();
-        for(String s : containedStr){
+        for (String s : containedStr) {
             System.out.println(s);
         }
         rLock2.unlock();
     }
 
-    void writeToFile(String str, String file)
-    {
+    void writeToFile(String str, String file) {
         try {
             rLock2.lock();
             BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
-            bw.write(str+"\n");
-            bw.close();rLock2.unlock();
+            bw.write(str + "\n");
+            bw.close();
+            rLock2.unlock();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
 
-    void checkEquals(File fi, String fo  ) {
-    //-------------------------
+    void checkEquals(File fi, String fo) {
+        //-------------------------
         BufferedReader br = null;
         try {
             //br = new BufferedReader(new FileReader("C:\\docs\\Harry Potter and the Philosophers Stone.txt"));
             br = new BufferedReader(new FileReader(fi));
 
-        String readedStr;
-        String tempStr = "";
-        //HashMap<Integer,String> tempStr = new HashMap<>();
-        //int i = 0;
-        while((readedStr = br.readLine())!= null) {
-            //i++;
-            if (tempStr == "") {
-                Matcher mLeft;
-                mLeft = pLeft.matcher(readedStr);
-                if (mLeft.find()) {
-                    String str = mLeft.group();
-                    //tempStr.put(i,str);
-                    tempStr += str;
+            String readedStr;
+            String tempStr = "";
+            //HashMap<Integer,String> tempStr = new HashMap<>();
+            //int i = 0;
+            while ((readedStr = br.readLine()) != null) {
+                //i++;
+                if (tempStr == "") {
+                    Matcher mLeft;
+                    mLeft = pLeft.matcher(readedStr);
+                    if (mLeft.find()) {
+                        String str = mLeft.group();
+                        //tempStr.put(i,str);
+                        tempStr += str;
 
 
-                }
-            }
-
-            if (tempStr != "") {
-                Matcher mRight;
-                mRight = pRight.matcher(readedStr);
-                if (mRight.find()) {
-                    String str = mRight.group();
-                    //tempStr.put(i,str);
-                    tempStr += str;
-                    //System.out.println(tempStr);
-                    if(containsInDict(str,dictHash)){
-                        System.out.println(str);
-                        writeToFile(str,fo);
                     }
-                    tempStr = "";
                 }
-            }
 
-            Matcher mAll;
-            mAll = pAll.matcher(readedStr);
-            while (mAll.find()) {
-                String str = mAll.group();
-                //System.out.println(str);
-                if(containsInDict(str,dictHash)){
-                    System.out.println(str);
-                    writeToFile(str,fo);
+                if (tempStr != "") {
+                    Matcher mRight;
+                    mRight = pRight.matcher(readedStr);
+                    if (mRight.find()) {
+                        String str = mRight.group();
+                        //tempStr.put(i,str);
+                        tempStr += str;
+                        //System.out.println(tempStr);
+                        if (containsInDict(str, dictHash)) {
+                            System.out.println(str);
+                            writeToFile(str, fo);
+                        }
+                        tempStr = "";
+                    }
+                }
+                Matcher mAll;
+                mAll = pAll.matcher(readedStr);
+                while (mAll.find()) {
+                    String str = mAll.group();
+                    //System.out.println(str);
+                    if (containsInDict(str, dictHash)) {
+                        System.out.println(str);
+                        writeToFile(str, fo);
+                    }
                 }
             }
-        }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -147,14 +120,14 @@ public class ContainChecker implements Occurenciesable{
         //------------------------
     }
 
-    boolean containsInDict(String st, HashSet<String> dic  ){
+    boolean containsInDict(String st, HashSet<String> dic) {
         st = st.toLowerCase();
         HashSet<String> setWords = new HashSet<>();
         //System.out.println(st);
         String mustBeDestroyed = "([^а-яa-z]+)";
         st = st.replaceAll(mustBeDestroyed, " ");
-        Collections.addAll(setWords,st.split("\\s+")) ;
-        if(!Collections.disjoint(setWords, dic)){
+        Collections.addAll(setWords, st.split("\\s+"));
+        if (!Collections.disjoint(setWords, dic)) {
             //System.out.println(st);
             return true;
         }
@@ -169,6 +142,21 @@ public class ContainChecker implements Occurenciesable{
         getDictHashSet(words);
         checkContain(sources, res);
 
+        Thread[] threadMas = new Thread[2];
+        for (int i = 0; i < threadMas.length; i++) {
+            threadMas[i] = new WorkingThread(this, sources, res);
+            threadMas[i].start();
 
+        }
+        //2 потока 30sec
+        //3 потока 31sec
+        //5 потоков 32sec
+        for (Thread i : threadMas) {
+            try {
+                i.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
