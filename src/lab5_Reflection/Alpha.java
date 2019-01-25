@@ -2,8 +2,17 @@ package lab5_Reflection;
 
 public class Alpha {
     String job = "bank";
-    public String name = "Виктор";
+    public String name = null;
+    int af;
     protected String surname = "Petrov";
     private char nick = 'a';
-    private int age = 20;
+    final int age;
+
+   /* {
+        age = 10;
+    }*/
+
+    Alpha(){
+        age = 100;
+    }
 }

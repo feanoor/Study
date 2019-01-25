@@ -18,12 +18,21 @@ public class Serializator implements MySerializible {
     public void serialize(Object object, String file) {
         Class cl = object.getClass();
         Field[] fields = cl.getDeclaredFields();
-        //fields[3].setAccessible(true);
+
+        System.out.println(fields.length);
         StringBuilder sb = new StringBuilder();
         sb.append("<0class type=\"" + object.getClass().toString().split(" ")[1] + "\"" + " value=\"\"/>\n");
         for (Field fi : fields) {
             try {
                 fi.setAccessible(true);
+                System.out.println(fi.getName());
+                System.out.println(fi.getType());
+                System.out.println(fi.get(object));
+                if(fi.getType().toString().equals("class java.lang.String")&fi.get(object)==null){
+                    System.out.println(fi.getType().toString());
+                    System.out.println(fi.get(object));
+                    continue;
+                }
                 sb.append("<" + fi.getName() + " "
                         + "type=\"" + fi.getType().toString().replaceAll("^.*[.]", "")
                         + "\" value=\"" + fi.get(object) + "\"/>\n");
@@ -31,7 +40,6 @@ public class Serializator implements MySerializible {
                 e.printStackTrace();
             }
         }
-        //System.out.println(sb);
         try {
             Files.write(Paths.get(file), sb.toString().getBytes());
         } catch (IOException e) {
@@ -59,7 +67,6 @@ public class Serializator implements MySerializible {
     private void readSerialize(String file) {
         try {
             for (String i : Files.readAllLines(Paths.get(file))) {
-                //System.out.println(i);
                 Matcher m1 = p1.matcher(i);
                 if (m1.matches()) {
                     mapAttributes.put(m1.group(1), new DoubleString(m1.group(2), m1.group(3)));
@@ -72,63 +79,64 @@ public class Serializator implements MySerializible {
     }
 
     private Object creatingNewInstance() {
-        //Alpha alpha = new Alpha();
         Object alpha = null;
         try {
-            //System.out.println((mapAttributes.get("0class").s1));
             Class C = Class.forName(mapAttributes.get("0class").s1);
             alpha = C.newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
+        try {
+            Field fin = alpha.getClass().getDeclaredField("age");
+            fin.setAccessible(true);
+            fin.set(alpha,80);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
 
         Field[] aField = alpha.getClass().getDeclaredFields();
-        //System.out.println();
         for (Field f : aField) {
             try {
                 f.setAccessible(true);
+                if(mapAttributes.get(f.getName())==null) {
+                    System.out.println(f.getName() + " continue");
+                    continue;
+                }
                 if (mapAttributes.get(f.getName()).s1.equals("String")) {
-                    //System.out.println("меняем имя на " + mapAttributes.get(f.getName()).s2);
                     f.set(alpha, mapAttributes.get(f.getName()).s2);
                     continue;
                 }
                 if (mapAttributes.get(f.getName()).s1.equals("int")) {
-                    //System.out.println("меняем имя на " + mapAttributes.get(f.getName()).s2);
                     f.set(alpha, Integer.valueOf(mapAttributes.get(f.getName()).s2));
                     continue;
                 }
                 if (mapAttributes.get(f.getName()).s1.equals("long")) {
-                    //System.out.println("меняем имя на " + mapAttributes.get(f.getName()).s2);
                     f.set(alpha, Long.valueOf(mapAttributes.get(f.getName()).s2));
                     continue;
                 }
                 if (mapAttributes.get(f.getName()).s1.equals("double")) {
-                    //System.out.println("меняем имя на " + mapAttributes.get(f.getName()).s2);
                     f.set(alpha, Double.valueOf(mapAttributes.get(f.getName()).s2));
                     continue;
                 }
                 if (mapAttributes.get(f.getName()).s1.equals("float")) {
-                    //System.out.println("меняем имя на " + mapAttributes.get(f.getName()).s2);
                     f.set(alpha, Float.valueOf(mapAttributes.get(f.getName()).s2));
                     continue;
                 }
                 if (mapAttributes.get(f.getName()).s1.equals("boolean")) {
-                    //System.out.println("меняем имя на " + mapAttributes.get(f.getName()).s2);
                     f.set(alpha, Boolean.valueOf(mapAttributes.get(f.getName()).s2));
                     continue;
                 }
                 if (mapAttributes.get(f.getName()).s1.equals("short")) {
-                    //System.out.println("меняем имя на " + mapAttributes.get(f.getName()).s2);
                     f.set(alpha, Short.valueOf(mapAttributes.get(f.getName()).s2));
                     continue;
                 }
                 if (mapAttributes.get(f.getName()).s1.equals("byte")) {
-                    //System.out.println("меняем имя на " + mapAttributes.get(f.getName()).s2);
                     f.set(alpha, Byte.valueOf(mapAttributes.get(f.getName()).s2));
                     continue;
                 }
                 if (mapAttributes.get(f.getName()).s1.equals("char")) {
-                    //System.out.println("меняем имя на " + mapAttributes.get(f.getName()).s2);
                     f.set(alpha, Character.valueOf((mapAttributes.get(f.getName()).s2).charAt(0)));
                     continue;
                 }
