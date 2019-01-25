@@ -15,8 +15,6 @@ public class Main {
                 st.add(str);
             }
             dictMas = st.toArray(new String[0]);
-            //------------------------------------------------------------------
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -24,16 +22,19 @@ public class Main {
         //тут генерим список путей к файлам из указанной директории
         String[] sourcePaths;
         ArrayList<String> arrPaths = new ArrayList();
-        //here is source
-        //File file = new File("C:\\docs\\trash2\\");
-        File file = new File("C:\\docs\\trash3\\");
+        //here is source files
+        File file = new File("C:\\docs\\trash\\");
         for (File i : file.listFiles()) {
             if (i.isFile()) {
 
                 arrPaths.add(i.getAbsolutePath());
             }
         }
-        sourcePaths = arrPaths.toArray(new String[0]);
+        //here is source http
+        sourcePaths = new String[20];
+        for(int i = 0 ; i < sourcePaths.length ; i++){
+            sourcePaths[i] = "http://www.gutenberg.org/files/" + (i+48562) + "/" + (i+48562) + "-0.txt";
+        }
         long start = System.currentTimeMillis();
         ContainChecker ch = new ContainChecker();
         ch.getOccurencies(sourcePaths, dictMas, "C:\\docs\\output.txt");

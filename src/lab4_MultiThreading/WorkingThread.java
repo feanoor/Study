@@ -1,21 +1,27 @@
 package lab4_MultiThreading;
 
-
+/**
+ * Класс который выполняет обработку ресурсов. Каждый ресурс обрабатывается отдельным потоком.
+ */
 public class WorkingThread extends Thread {
-    String[] source;
-    String output;
+    String source;
     ContainChecker ch;
 
+    /**
+     * Метод run инициализирует обработку ресурса.
+     */
     @Override
     public void run() {
-        System.out.println("Поток " + this.getName() + " запущен!");
-        //ContainChecker cr = new ContainChecker();
-        ch.checkContain(source, output);
+        ch.checkResourceType(source);
     }
 
-    WorkingThread(ContainChecker ch, String[] source, String output) {
+    /**
+     * При инициализации класса, выполняется данный конструктор.
+     * @param ch Экземпляр класса ContainChecker.
+     * @param source Адрес ресурса.
+     */
+    WorkingThread(ContainChecker ch, String source) {
         this.ch = ch;
-        this.output = output;
         this.source = source;
     }
 }
