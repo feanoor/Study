@@ -32,8 +32,8 @@ public class Main {
         }
         //here is source http
         sourcePaths = new String[20];
-        for(int i = 0 ; i < sourcePaths.length ; i++){
-            sourcePaths[i] = "http://www.gutenberg.org/files/" + (i+48562) + "/" + (i+48562) + "-0.txt";
+        for (int i = 0; i < sourcePaths.length; i++) {
+            sourcePaths[i] = "http://www.gutenberg.org/files/" + (i + 48562) + "/" + (i + 48562) + "-0.txt";
         }
         long start = System.currentTimeMillis();
         ContainChecker ch = new ContainChecker();

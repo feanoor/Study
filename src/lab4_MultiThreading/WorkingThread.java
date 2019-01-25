@@ -17,7 +17,8 @@ public class WorkingThread extends Thread {
 
     /**
      * При инициализации класса, выполняется данный конструктор.
-     * @param ch Экземпляр класса ContainChecker.
+     *
+     * @param ch     Экземпляр класса ContainChecker.
      * @param source Адрес ресурса.
      */
     WorkingThread(ContainChecker ch, String source) {

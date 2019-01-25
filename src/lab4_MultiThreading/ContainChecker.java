@@ -1,7 +1,6 @@
 package lab4_MultiThreading;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.*;
@@ -28,6 +27,7 @@ public class ContainChecker implements Occurenciesable {
 
     /**
      * Преобразует массив слов словаря в HashMap.
+     *
      * @param str Массив слов словаря типа String.
      */
     void getDictHashSet(String[] str) {
@@ -37,36 +37,34 @@ public class ContainChecker implements Occurenciesable {
 
     /**
      * Определяет тип ресурса.
+     *
      * @param resource Адрес ресурса.
      */
     public void checkResourceType(String resource) {
-        if(resource.startsWith("http")){
-            checkEquals(typeResource.URL, resource , outputFile);
-        }
-        else{
-            if(resource.startsWith("ftp")){
-                checkEquals(typeResource.FTP, resource , outputFile);
-            }
-            else {
-                checkEquals(typeResource.FILE , resource , outputFile);
+        if (resource.startsWith("http")) {
+            checkEquals(typeResource.URL, resource, outputFile);
+        } else {
+            if (resource.startsWith("ftp")) {
+                checkEquals(typeResource.FTP, resource, outputFile);
+            } else {
+                checkEquals(typeResource.FILE, resource, outputFile);
             }
         }
     }
 
     /**
      * Осуществляет запись найденных предложений в файл.
-     * @param str Предложение которое нужно записать.
+     *
+     * @param str  Предложение которое нужно записать.
      * @param file Адрес файла.
      */
     void writeToFile(String str, String file) {
         try {
-
             rLock2.lock();
             BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
             bw.write(str + "\n");
             bw.close();
             rLock2.unlock();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,10 +72,11 @@ public class ContainChecker implements Occurenciesable {
 
     /**
      * Метод проверяет доступность ftp или http ресурса.
+     *
      * @param resource Адрес типа String.
      * @return Если ресурс доступен возвращает false, иначе true.
      */
-    boolean resAvailable(String resource){
+    boolean resAvailable(String resource) {
         try {
             new URL(resource).openConnection().getInputStream();
             return true;
@@ -88,11 +87,11 @@ public class ContainChecker implements Occurenciesable {
 
     private BufferedReader checkResource(typeResource typeR, String fi) throws IOException {
         BufferedReader br = null;
-        if (typeR.equals(typeResource.FILE)){
+        if (typeR.equals(typeResource.FILE)) {
             br = new BufferedReader(new FileReader(fi));
         }
-        if (typeR.equals(typeResource.URL)|typeR.equals(typeResource.FTP)){
-            if(!resAvailable(fi)){
+        if (typeR.equals(typeResource.URL) | typeR.equals(typeResource.FTP)) {
+            if (!resAvailable(fi)) {
                 return null;
             }
             br = new BufferedReader(new InputStreamReader(new URL(fi).openConnection().getInputStream()));
@@ -102,14 +101,15 @@ public class ContainChecker implements Occurenciesable {
 
     /**
      * Метод проверяет по шаблону считанные строки и собирает их в предложения.
+     *
      * @param typeR Тип реурса.
-     * @param fi Адрес ресурса.
-     * @param fo Адрес выходного файла.
+     * @param fi    Адрес ресурса.
+     * @param fo    Адрес выходного файла.
      */
     void checkEquals(typeResource typeR, String fi, String fo) {
         try {
             BufferedReader br = checkResource(typeR, fi);
-            if (br.equals(null)){
+            if (br.equals(null)) {
                 return;
             }
             String readedStr;
@@ -153,7 +153,8 @@ public class ContainChecker implements Occurenciesable {
 
     /**
      * Проверяет содержится ли в данном предложении слова из словаря.
-     * @param st Предложение типа String.
+     *
+     * @param st  Предложение типа String.
      * @param dic Словарь, слова из которого ищем в предложении.
      * @return true, если найдено хотя бы одно слово, иначе false.
      */
@@ -171,9 +172,10 @@ public class ContainChecker implements Occurenciesable {
 
     /**
      * Очищает выходной файл, создает ThreadPool, который раздает задания потокам.
+     *
      * @param sources Массив ресурсов (http, ftp, txt) типа String.
-     * @param words Массив искомых слов типа String.
-     * @param res Адрес выходного файла типа String.
+     * @param words   Массив искомых слов типа String.
+     * @param res     Адрес выходного файла типа String.
      * @throws FileNotFoundException
      */
     @Override
