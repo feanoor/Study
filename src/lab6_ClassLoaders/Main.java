@@ -1,5 +1,7 @@
 package lab6_ClassLoaders;
 
+import lab5_Reflection.Alpha;
+
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.IOException;
