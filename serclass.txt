@@ -1,0 +1,6 @@
+<0class type="lab5_Reflection.Alpha" value=""/>
+<job type="String" value="bank"/>
+<af type="int" value="0"/>
+<surname type="String" value="Petrov"/>
+<nick type="char" value="a"/>
+<age type="int" value="100"/>

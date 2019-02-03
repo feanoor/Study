@@ -27,8 +27,9 @@ public class Main {
         ob.addObject(353);
         ob.addObject(true);
         System.out.println(ob.dump());
-        mb.addObject(1.0);
+        //mb.addObject(1.0);
         System.out.println(mb.toString());
+
     }
 
 

@@ -5,14 +5,14 @@ import java.util.*;
 /**
  * Класс осуществляет хранение, добавление и удаление коллекции элементов Object
  */
-public class ObjectBox {
-    private Collection objList = new ArrayList<>();
+public class ObjectBox<T> {
+     Collection<T> objList = new ArrayList<>();
 
     /**
      * Добавляет элемент в коллекцию
      * @param obj любой элемент типа Object
      */
-    void addObject(Object obj) {
+    void addObject(T obj) {
         objList.add(obj);
     }
 
@@ -20,7 +20,7 @@ public class ObjectBox {
      * Удаляет элемент из коллекции
      * @param obj любой элемент типа Object
      */
-    void deleteObject(Object obj) {
+    void deleteObject(T obj) {
         objList.remove(obj);
     }
 

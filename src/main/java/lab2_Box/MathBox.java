@@ -9,13 +9,13 @@ import java.util.*;
  * Класс предназначен для хранения и обработки коллекции с типами унаследованными от Number
  * @param <T> любой наследник Number
  */
-public class MathBox<T extends Number> extends ObjectBox {
-    private Set<T> arrInt;
+public class MathBox<T extends Number> extends ObjectBox<T> {
+//    private Set<T> objList;
     final private int hCode;
 
 
     public MathBox(T[] mas) {
-        arrInt = new TreeSet<>(Arrays.asList(mas));
+        objList = new TreeSet<>(Arrays.asList(mas));
         hCode = (int) (Math.sqrt(Math.abs(summator().doubleValue())) * 99 * Math.random());
     }
 
@@ -24,12 +24,12 @@ public class MathBox<T extends Number> extends ObjectBox {
      * @param val
      */
     void removeElement(T val) {
-        arrInt.remove(val);
+        objList.remove(val);
     }
 
     @Override
-    void deleteObject(Object obj) {
-        removeElement((T)obj);
+    void deleteObject(T obj) {
+        removeElement(obj);
     }
 
     /**
@@ -38,7 +38,7 @@ public class MathBox<T extends Number> extends ObjectBox {
      */
     BigDecimal summator() {
         BigDecimal sum = BigDecimal.ZERO;
-        for (T i : arrInt) {
+        for (Object i : objList) {
             sum = sum.add(new BigDecimal(i.toString()));
         }
         return sum;
@@ -51,8 +51,8 @@ public class MathBox<T extends Number> extends ObjectBox {
      */
     Set<Double> splitter(Number divider) {
         TreeSet<Double> set = new TreeSet<>();
-        for (T i : arrInt) {
-            Double d = i.doubleValue() / Double.valueOf(divider.doubleValue());
+        for (Object i : objList) {
+            Double d = ((Number)i).doubleValue() / Double.valueOf(divider.doubleValue());
             set.add(d);
         }
         return set;
@@ -66,7 +66,7 @@ public class MathBox<T extends Number> extends ObjectBox {
     @Override
     public String toString() {
         String val = "[";
-        for (T i : arrInt) {
+        for (Object i : objList) {
             val += i.toString() + ",";
         }
         val.trim();
@@ -74,7 +74,7 @@ public class MathBox<T extends Number> extends ObjectBox {
     }
 
     @Override
-    void addObject(Object obj) {
+    void addObject(T obj) {
         if(!(obj.getClass().getSuperclass() == Number.class)){
             try {
                 throw new MySimpleException("Object нельзя добавить в MathBox.");
@@ -83,7 +83,7 @@ public class MathBox<T extends Number> extends ObjectBox {
             }
         }
         try {
-            arrInt.add((T)obj);
+            objList.add(obj);
         } catch (ClassCastException ex){
             System.out.println("Значение такого типа невозможно добавить в данную коллекцию.");
         }
