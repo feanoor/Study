@@ -1,10 +1,8 @@
 package lab8_StreamAPI;
 
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
-
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
     class MultiThreadingTests {
