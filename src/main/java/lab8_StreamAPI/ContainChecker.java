@@ -21,14 +21,14 @@ public class ContainChecker implements Occurenciesable {
     static ReentrantLock rLock2 = new ReentrantLock();
     private String outputFile;
 
-    /**
-     * Типы ресурсов
-     */
-    enum typeResource {
-        URL,
-        FILE,
-        FTP
-    }
+//    /**
+//     * Типы ресурсов
+//     */
+//    enum typeResource {
+//        URL,
+//        FILE,
+//        FTP
+//    }
 
     /**
      * Преобразует массив слов словаря в HashMap.
@@ -39,23 +39,26 @@ public class ContainChecker implements Occurenciesable {
         dictHash = new HashSet<>();
         dictHash.addAll(Arrays.asList(str));
     }
-
-    /**
-     * Определяет тип ресурса.
-     *
-     * @param resource Адрес ресурса.
-     */
-    public void checkResourceType(String resource) {
-        if (resource.startsWith("http")) {
-            checkEquals(typeResource.URL, resource, outputFile);
-        } else {
-            if (resource.startsWith("ftp")) {
-                checkEquals(typeResource.FTP, resource, outputFile);
-            } else {
-                checkEquals(typeResource.FILE, resource, outputFile);
-            }
-        }
-    }
+//
+//    /**
+//     * Определяет тип ресурса.
+//     *
+//     * @param resource Адрес ресурса.
+//     */
+//    public void checkResourceType(String resource) throws IOException {
+//        if (resource.startsWith("http")) {
+//            typeResource tr = typeResource.URL;
+//            checkEquals(checkResource(tr,resource), outputFile);
+//        } else {
+//            if (resource.startsWith("ftp")) {
+//                typeResource tr = typeResource.FTP;
+//                checkEquals(checkResource(tr,resource), outputFile);
+//            } else {
+//                typeResource tr = typeResource.FILE;
+//                checkEquals(checkResource(tr,resource), outputFile);
+//            }
+//        }
+//    }
 
     /**
      * Осуществляет запись найденных предложений в файл.
@@ -74,46 +77,43 @@ public class ContainChecker implements Occurenciesable {
             e.printStackTrace();
         }
     }
-
-    /**
-     * Метод проверяет доступность ftp или http ресурса.
-     *
-     * @param resource Адрес типа String.
-     * @return Если ресурс доступен возвращает false, иначе true.
-     */
-    boolean resAvailable(String resource) {
-        try {
-            new URL(resource).openConnection().getInputStream();
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    private BufferedReader checkResource(typeResource typeR, String fi) throws IOException {
-        BufferedReader br = null;
-        if (typeR.equals(typeResource.FILE)) {
-            br = new BufferedReader(new FileReader(fi));
-        }
-        if (typeR.equals(typeResource.URL) | typeR.equals(typeResource.FTP)) {
-            if (!resAvailable(fi)) {
-                return null;
-            }
-            br = new BufferedReader(new InputStreamReader(new URL(fi).openConnection().getInputStream()));
-        }
-        return br;
-    }
+//
+//    /**
+//     * Метод проверяет доступность ftp или http ресурса.
+//     *
+//     * @param resource Адрес типа String.
+//     * @return Если ресурс доступен возвращает false, иначе true.
+//     */
+//    boolean resAvailable(String resource) {
+//        try {
+//            new URL(resource).openConnection().getInputStream();
+//            return true;
+//        } catch (IOException e) {
+//            return false;
+//        }
+//    }
+//
+//    private BufferedReader checkResource(typeResource typeR, String fi) throws IOException {
+//        BufferedReader br = null;
+//        if (typeR.equals(typeResource.FILE)) {
+//            br = new BufferedReader(new FileReader(fi));
+//        }
+//        if (typeR.equals(typeResource.URL) | typeR.equals(typeResource.FTP)) {
+//            if (!resAvailable(fi)) {
+//                return null;
+//            }
+//            br = new BufferedReader(new InputStreamReader(new URL(fi).openConnection().getInputStream()));
+//        }
+//        return br;
+//    }
 
     /**
      * Метод проверяет по шаблону считанные строки и собирает их в предложения.
      *
-     * @param typeR Тип реурса.
-     * @param fi    Адрес ресурса.
      * @param fo    Адрес выходного файла.
      */
-    void checkEquals(typeResource typeR, String fi, String fo) {
+    void checkEquals(BufferedReader br, String fo) {
         try {
-            BufferedReader br = checkResource(typeR, fi);
             if (br.equals(null)) {
                 return;
             }
@@ -134,7 +134,7 @@ public class ContainChecker implements Occurenciesable {
                     if (mRight.find()) {
                         String str = mRight.group();
                         tempStr += str;
-                        if (containsInDict(str, dictHash)) {
+                        if (containsInDict(tempStr, dictHash)) {
                             writeToFile(tempStr, fo);
                         }
                         tempStr = "";
@@ -200,7 +200,7 @@ public class ContainChecker implements Occurenciesable {
         getDictHashSet(words);
         ExecutorService service = Executors.newFixedThreadPool(10);
         Arrays.stream(sources)
-                .forEach(s -> service.submit(new WorkingThread(this, s)));
+                .forEach(s -> service.submit(new WorkingThread(this, s, res)));
         /*for (String s : sources) {
             service.submit(new WorkingThread(this, s));
         }*/
