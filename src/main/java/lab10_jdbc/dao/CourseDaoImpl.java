@@ -5,13 +5,14 @@ import lab10_jdbc.entity.Subject;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+
 import org.slf4j.*;
 
 
 public class CourseDaoImpl implements CourseDAO {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CourseDaoImpl.class);
 
     public static final String GET_SUBJECT_SQL_TEMPLATE =
             "select subject_id, description from subject";
@@ -27,12 +28,15 @@ public class CourseDaoImpl implements CourseDAO {
 
     private final Connection connection;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CourseDaoImpl.class);
-
     public CourseDaoImpl(Connection connection) {
         this.connection = connection;
     }
 
+    /**
+     * Создает список персон по субьекту.
+     * @param subject Объект типа Subject.
+     * @return
+     */
     @Override
     public Collection<Person> getPersonsBySubject(Subject subject) {
         Collection<Person> persons = new ArrayList<>();
@@ -40,17 +44,21 @@ public class CourseDaoImpl implements CourseDAO {
             statement.setInt(1, subject.getId());
             ResultSet rs;
             rs = statement.executeQuery();
-            while (rs.next()){
-                persons.add(new Person(rs.getInt(1),rs.getString(2),rs.getTimestamp(3).getTime()));
+            while (rs.next()) {
+                persons.add(new Person(rs.getInt(1), rs.getString(2), rs.getTimestamp(3).getTime()));
             }
-        }catch (Exception ex){
-            //ex.printStackTrace();
-
-            System.out.println("Что-то пошло не так...");
+        } catch (Exception ex) {
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при получении списка студентов!");
         }
         return persons;
     }
 
+    /**
+     * Создает список предметов по персоне.
+     * @param person Объект типа Person.
+     * @return
+     */
     @Override
     public Collection<Subject> getSubjectsByPerson(Person person) {
         Collection<Subject> subjects = new ArrayList<>();
@@ -58,16 +66,22 @@ public class CourseDaoImpl implements CourseDAO {
             statement.setInt(1, person.getId());
             ResultSet rs;
             rs = statement.executeQuery();
-            while (rs.next()){
-                subjects.add(new Subject(rs.getInt(1),rs.getString(2)));
+            while (rs.next()) {
+                subjects.add(new Subject(rs.getInt(1), rs.getString(2)));
             }
-        }catch (Exception ex){
-            //ex.printStackTrace();
-            System.out.println("Что-то пошло не так...");
+        } catch (Exception ex) {
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при получении списка предметов!");
         }
         return subjects;
     }
 
+    /**
+     * Назначить персону на курс по предмету.
+     * @param date Дата курса в формате long.
+     * @param person Персона.
+     * @param subject Предмет.
+     */
     @Override
     public void linkToCourse(Long date, Person person, Subject subject) {
         try (PreparedStatement statement = connection.prepareStatement(LINK_TO_COURSE_SQL_TEMPLATE)) {
@@ -76,58 +90,75 @@ public class CourseDaoImpl implements CourseDAO {
             statement.setDate(3, new Date(date));
             statement.execute();
             connection.commit();
-            System.out.println("Курс на дату " + new Date(date).toString() + " создан.");
-        }
-        catch (SQLException sqlex){
-            sqlex.printStackTrace();
-        }
-        catch (Exception ex){
-            //ex.printStackTrace();
-            System.out.println("Что-то пошло не так...");
+            LOGGER.info("Курс на дату " + new Date(date).toString() + " создан.");
+        } catch (Exception ex) {
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при добавлении на курс!");
         }
     }
 
+    /**
+     * Назначить персону на курс по предметам.
+     * @param date Дата курса в формате long.
+     * @param person Персона.
+     * @param subject Массив предметов.
+     */
     @Override
     public void linkToCourse(Long date, Person person, Subject... subject) {
         try (PreparedStatement statement = connection.prepareStatement(LINK_TO_COURSE_SQL_TEMPLATE)) {
             statement.setInt(2, person.getId());
             statement.setDate(3, new Date(date));
-            for(Subject sub : subject){
+            for (Subject sub : subject) {
                 statement.setInt(1, sub.getId());
                 statement.addBatch();
             }
             statement.executeBatch();
             connection.commit();
-            System.out.println("Курсы на дату " + new Date(date).toString() + " созданы.");
-        }
-        catch (SQLException sqlex){
-            sqlex.printStackTrace();
-        }
-        catch (Exception ex){
-            //ex.printStackTrace();
-            System.out.println("Что-то пошло не так...");
+            LOGGER.info("Курсы на дату " + new Date(date).toString() + " созданы.");
+        } catch (Exception ex) {
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при добавлении на курс!");
         }
     }
 
+    /**
+     * Назначить персоны на курс по предмету.
+     * @param date Дата курса в формате long.
+     * @param person Массив персон.
+     * @param subject Предмет.
+     */
     @Override
     public void linkToCourse(Long date, Subject subject, Person... person) {
         try (PreparedStatement statement = connection.prepareStatement(LINK_TO_COURSE_SQL_TEMPLATE)) {
             statement.setInt(1, subject.getId());
             statement.setDate(3, new Date(date));
-            for(Person per : person){
+            for (Person per : person) {
                 statement.setInt(2, per.getId());
                 statement.addBatch();
             }
             statement.executeBatch();
             connection.commit();
-            System.out.println("Курсы на дату " + new Date(date).toString() + " созданы.");
-        }
-        catch (SQLException sqlex){
-            sqlex.printStackTrace();
-        }
-        catch (Exception ex){
-            //ex.printStackTrace();
-            System.out.println("Что-то пошло не так...");
+            LOGGER.info("Курсы на дату " + new Date(date).toString() + " созданы.");
+        } catch (SQLException sqlex) {
+            LOGGER.error(sqlex.getMessage());
+        } catch (Exception ex) {
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при добавлении на курс!");
         }
     }
 

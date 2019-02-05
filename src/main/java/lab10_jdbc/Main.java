@@ -3,6 +3,8 @@ package lab10_jdbc;
 import lab10_jdbc.dao.*;
 import lab10_jdbc.entity.Person;
 import lab10_jdbc.entity.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,17 +13,11 @@ import java.util.Collection;
 
 
 public class Main {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        //Class.forName("org.postgresql.Driver");
-        String url = "jdbc:postgresql://localhost:5433/postgres";
-        String login = "postgres";
-        String pass = "admin";
-
-        Connection connection = DriverManager.getConnection(url, login, pass);
-        connection.setAutoCommit(false);
-        System.out.println(connection);
-
-        PersonDAO personDAO = new PersonDAOImpl(connection);
+        ConnectionController concon = ConnectionController.createController();
+        concon.setConnection();
+        PersonDAO personDAO = new PersonDAOImpl(concon.getConnection());
         Person person = new Person();
         person.setName("John Cnor");
         person.setBirthDate(95551446911L);
@@ -52,7 +48,7 @@ public class Main {
 //        Collection<Subject> subjects = subjectDAO.getAllSubjects();
 //        subjects.stream().map(Subject::toString).forEach(System.out::println);
 
-        CourseDAO courceDAO = new CourseDaoImpl(connection);
+        CourseDAO courceDAO = new CourseDaoImpl(concon.getConnection());
 //        Person person2 = new Person();
 //        person2.setId(6);
 //
@@ -77,10 +73,15 @@ public class Main {
 //        sub3.setId(10);
 //        Collection<Person> perss = courceDAO.getPersonsBySubject(sub3);
 //        perss.stream().map(Person::toString).forEach(System.out::println);
+        Person person20 = new Person();
+        person20.setId(20);
+        Subject sub5 = new Subject();
+        sub5.setId(5);
+        courceDAO.linkToCourse(112523532363L, person20, sub5);
         Collection<Subject> subjects = courceDAO.getSubjectsByPerson(person3);
         subjects.stream().map(Subject::toString).forEach(System.out::println);
 
-        connection.close();
+        concon.closeConnection();
     }
 }
 

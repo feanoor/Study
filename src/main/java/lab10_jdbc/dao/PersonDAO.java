@@ -1,7 +1,6 @@
 package lab10_jdbc.dao;
 
 import lab10_jdbc.entity.Person;
-//import lab10_jdbc.entity.Subject;
 
 import java.sql.SQLException;
 import java.util.Collection;

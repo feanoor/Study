@@ -1,7 +1,8 @@
 package lab10_jdbc.dao;
 
-import lab10_jdbc.entity.Person;
 import lab10_jdbc.entity.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Collection;
 
 public class SubjectDAOImpl implements SubjectDAO {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectDAOImpl.class);
 
     public static final String INSERT_SUBJECT_SQL_TEMPLATE =
             "insert into subject (description) values (?) returning subject_id";
@@ -25,11 +27,19 @@ public class SubjectDAOImpl implements SubjectDAO {
 
     private final Connection connection;
 
+    /**
+     * Получает подключение и сохраняет в данном объекте.
+     * @param connection
+     */
     public SubjectDAOImpl(Connection connection) {
         this.connection = connection;
     }
 
 
+    /**
+     * Получить коллекцию всех предметов.
+     * @return Коллекция предметов.
+     */
     @Override
     public Collection<Subject> getAllSubjects() {
         Collection<Subject> subjects = new ArrayList<>();
@@ -39,14 +49,25 @@ public class SubjectDAOImpl implements SubjectDAO {
             while (rs.next()){
                 subjects.add(new Subject(rs.getInt(1),rs.getString(2)));
             }
+            if(subjects.size()>0){
+                LOGGER.info("Получение списка предметов успешно!");
+            }
+            else {
+                LOGGER.info("Таблица предметов пуста!");
+            }
         }catch (Exception ex){
-            //ex.printStackTrace();
-
-            System.out.println("Что-то пошло не так...");
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при получении списка предметов!");
         }
         return subjects;
     }
 
+    /**
+     * Добавить в БД предмет.
+     * @param subject Объект типа Subject.
+     * @return Если возвращает не -1 значит транзакция успешна.
+     * @throws SQLException
+     */
     @Override
     public int createSubject(Subject subject) throws SQLException {
         int i = -1;
@@ -60,16 +81,25 @@ public class SubjectDAOImpl implements SubjectDAO {
                 throw new SQLException();
             }
             connection.commit();
-            System.out.println("Предмет " + subject.getDescription() + " добавлен.");
+            LOGGER.info("Предмет " + subject.getDescription() + " добавлен!");
         }catch (Exception ex){
-            //ex.printStackTrace();
-
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             i = -1;
-            System.out.println("Что-то пошло не так...");
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при создании предмета!");
         }
         return i;
     }
 
+    /**
+     * Обновляет информацию о предмете.
+     * @param subject Объект типа Subject. id у объекта должен быть такой же
+     * какой у изменяемой записи в БД.
+     */
     @Override
     public void updateSubject(Subject subject) {
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_SUBJECT_SQL_TEMPLATE)) {
@@ -77,22 +107,38 @@ public class SubjectDAOImpl implements SubjectDAO {
             statement.setInt(2, subject.getId());
             statement.execute();
             connection.commit();
+            LOGGER.info("subject " + " с id= "+ subject.getId() +" обновлен!");
         }catch (Exception ex){
-            ex.printStackTrace();
-            System.out.println("Что-то пошло не так...");
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при обновлении предмета!");
         }
     }
 
+    /**
+     * Удаляет запись о предмете.
+     * @param subject Объект типа Subject. id у объекта должен быть такой же
+     * какой у удаляемой записи в БД.
+     */
     @Override
     public void deleteSubject(Subject subject) {
         try (PreparedStatement statement = connection.prepareStatement(DELETE_SUBJECT_SQL_TEMPLATE)) {
             statement.setInt(1, subject.getId());
             statement.execute();
-            System.out.println("subject " + " с id= "+ subject.getId() +" удален.");
             connection.commit();
+            LOGGER.info("subject " + " с id= "+ subject.getId() +" удален!");
         }catch (Exception ex){
-            ex.printStackTrace();
-            System.out.println("Что-то пошло не так...");
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при получении удалении предмета!");
         }
     }
 }

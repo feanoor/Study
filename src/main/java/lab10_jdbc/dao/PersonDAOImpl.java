@@ -1,12 +1,16 @@
 package lab10_jdbc.dao;
 
 import lab10_jdbc.entity.Person;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class PersonDAOImpl implements PersonDAO {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersonDAOImpl.class);
 
     public static final String INSERT_PERSON_SQL_TEMPLATE =
             "insert into person (name, birth_date) values (?, ?) returning person_id";
@@ -22,11 +26,18 @@ public class PersonDAOImpl implements PersonDAO {
 
     private final Connection connection;
 
+    /**
+     * Получает подключение и сохраняет в данном объекте.
+     * @param connection
+     */
     public PersonDAOImpl(Connection connection) {
         this.connection = connection;
     }
 
-
+    /**
+     * Получить коллекцию всех персон.
+     * @return Коллекция персон.
+     */
     @Override
     public Collection<Person> getAllPersons() {
         Collection<Person> persons = new ArrayList<>();
@@ -36,13 +47,25 @@ public class PersonDAOImpl implements PersonDAO {
             while (rs.next()){
                 persons.add(new Person(rs.getInt(1),rs.getString(2),rs.getTimestamp(3).getTime()));
             }
+            if(persons.size()>0){
+                LOGGER.info("Получение списка студентов успешно!");
+            }
+            else {
+                LOGGER.info("Таблица студентов пуста!");
+            }
         }catch (Exception ex){
-            //ex.printStackTrace();
-            System.out.println("Что-то пошло не так...");
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при получении списка студентов!");
         }
         return persons;
     }
 
+    /**
+     * Добавить в БД персону.
+     * @param person Объект типа Person.
+     * @return Если возвращает не -1 значит транзакция успешна.
+     * @throws SQLException
+     */
     @Override
     public int createPerson(Person person) throws SQLException {
         int i = -1;
@@ -57,32 +80,50 @@ public class PersonDAOImpl implements PersonDAO {
                 throw new SQLException();
             }
             connection.commit();
-            System.out.println("Студент " + person.getName() + "  " + person.getBirthDate() + " добавлен.");
+            LOGGER.info("Студент " + person.getName() + "  " + person.getBirthDate() + " успешно добавлен.");
         }catch (Exception ex){
-            //ex.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             i = -1;
-            System.out.println("Что-то пошло не так...");
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при создании студента!");
         }
         return i;
     }
 
-
-
+    /**
+     * Обновляет информацию о персоне
+     * @param person Объект типа Person. id у объекта должен быть такой же
+     * какой у изменяемой записи в БД.
+     */
     @Override
     public void updatePerson(Person person) {
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_PERSON_SQL_TEMPLATE)) {
             statement.setString(1, person.getName());
             statement.setDate(2, new Date(person.getBirthDate()));
             statement.setInt(3, person.getId());
-            System.out.println("----------"+person.getId()+ " " + person.getName() + " " + person.getBirthDate());
             statement.execute();
             connection.commit();
+            LOGGER.info("Студент " + person.getId() + " успешно обновлен!");
         }catch (Exception ex){
-            ex.printStackTrace();
-            System.out.println("Что-то пошло не так...");
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при обновлении записи о студенте!");
         }
     }
 
+    /**
+     * Удаляет запись о персоне
+     * @param person Объект типа Person. id у объекта должен быть такой же
+     * какой у удаляемой записи в БД.
+     */
     @Override
     public void deletePerson(Person person) {
         try (PreparedStatement statement = connection.prepareStatement(DELETE_PERSON_SQL_TEMPLATE)) {
@@ -91,8 +132,13 @@ public class PersonDAOImpl implements PersonDAO {
             System.out.println("Студент " + person.getName() + " с id= "+ person.getId() +" удален.");
             connection.commit();
         }catch (Exception ex){
-            ex.printStackTrace();
-            System.out.println("Что-то пошло не так...");
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            LOGGER.debug(ex.getMessage());
+            LOGGER.error("Ошибка при удалении записи студента!");
         }
     }
 }
