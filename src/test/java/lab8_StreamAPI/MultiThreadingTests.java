@@ -49,6 +49,18 @@ import java.util.HashSet;
         }
 
         @org.junit.jupiter.api.Test
+        void writeToFileOnIOException(){
+            String filePath = "C:\\Users\\Администратор\\filename.txt";
+            String writingString = "Prev him, href html header class the.";
+            ContainChecker ccMock = Mockito.mock(cc.getClass());
+            Mockito.doThrow(IOException.class).when(ccMock).writeToFile(writingString, filePath);
+            //Mockito.doThrow(cc.writeToFile(writingString, filePath), IOException.class);
+
+
+
+        }
+
+        @org.junit.jupiter.api.Test
         void resAvailable() {
             Assertions.assertEquals(true,rl.resAvailable("http://www.gutenberg.org/files/48763/48763-0.txt"));
             Assertions.assertEquals(false,rl.resAvailable("http://www.gutenberg.org/files/4873/4876.txt"));
