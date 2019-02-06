@@ -1,5 +1,7 @@
 package lab4_MultiThreading;
 
+import java.io.IOException;
+
 /**
  * Класс который выполняет обработку ресурсов. Каждый ресурс обрабатывается отдельным потоком.
  */
@@ -12,7 +14,11 @@ public class WorkingThread extends Thread {
      */
     @Override
     public void run() {
-        ch.checkResourceType(source);
+        try {
+            ch.checkResourceType(source);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

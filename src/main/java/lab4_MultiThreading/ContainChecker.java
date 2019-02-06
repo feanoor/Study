@@ -40,14 +40,14 @@ public class ContainChecker implements Occurenciesable {
      *
      * @param resource Адрес ресурса.
      */
-    public void checkResourceType(String resource) {
+    public void checkResourceType(String resource) throws IOException {
         if (resource.startsWith("http")) {
-            checkEquals(typeResource.URL, resource, outputFile);
+            checkEquals(checkResource(typeResource.URL,resource), outputFile);
         } else {
             if (resource.startsWith("ftp")) {
-                checkEquals(typeResource.FTP, resource, outputFile);
+                checkEquals(checkResource(typeResource.URL,resource), outputFile);
             } else {
-                checkEquals(typeResource.FILE, resource, outputFile);
+                checkEquals(checkResource(typeResource.URL,resource), outputFile);
             }
         }
     }
@@ -99,16 +99,16 @@ public class ContainChecker implements Occurenciesable {
         return br;
     }
 
+
+
     /**
      * Метод проверяет по шаблону считанные строки и собирает их в предложения.
      *
-     * @param typeR Тип реурса.
-     * @param fi    Адрес ресурса.
      * @param fo    Адрес выходного файла.
      */
-    void checkEquals(typeResource typeR, String fi, String fo) {
+    void checkEquals(BufferedReader br, String fo) {
         try {
-            BufferedReader br = checkResource(typeR, fi);
+//            BufferedReader br = checkResource(typeR, fi);
             if (br.equals(null)) {
                 return;
             }
@@ -129,7 +129,8 @@ public class ContainChecker implements Occurenciesable {
                     if (mRight.find()) {
                         String str = mRight.group();
                         tempStr += str;
-                        if (containsInDict(str, dictHash)) {
+                        if (containsInDict(tempStr, dictHash)) {
+                            System.out.println("записываем: -------"  + tempStr);
                             writeToFile(tempStr, fo);
                         }
                         tempStr = "";
@@ -140,6 +141,7 @@ public class ContainChecker implements Occurenciesable {
                 while (mAll.find()) {
                     String str = mAll.group();
                     if (containsInDict(str, dictHash)) {
+                        System.out.println("записываем: -------"  + str);
                         writeToFile(str, fo);
                     }
                 }
